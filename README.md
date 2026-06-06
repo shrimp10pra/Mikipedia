@@ -3,77 +3,123 @@
 ## ファイル構成
 
 ```
-wiki/
-├── index.html          ← メインHTML（基本的に触らない）
-├── css/wiki.css        ← デザイン（基本的に触らない）
-└── js/
-    ├── data.js         ← ★ここを編集する！（記事データ）
-    └── wiki.js         ← 動作スクリプト（基本的に触らない）
+（リポジトリルート）/
+├── index.html              ← HTMLのみ（基本的に触らない）
+├── css/wiki.css            ← デザイン（基本的に触らない）
+├── js/wiki.js              ← 動作スクリプト（基本的に触らない）
+└── articles/
+    ├── _config.js          ← ★ サイト設定・カテゴリ定義
+    ├── _index.js           ← ★ 記事ID一覧（記事追加時に編集）
+    ├── _template.js        ← 新記事のテンプレート（コピーして使う）
+    ├── main.js             ← メインページ記事
+    ├── valhiem.js          ← 記事ファイル（1記事＝1ファイル）
+    ├── erik.js
+    └── aurora_power.js
 ```
-
-> **注意**: 以前のバージョンにあった `data/articles.json` は不要になりました。
-> 代わりに `js/data.js` を編集してください。
 
 ---
 
-## ローカルで確認する
+## 記事を追加する手順
 
-`index.html` をブラウザで**直接ダブルクリックするだけで動きます**。
-（fetchを使わなくなったためローカルサーバー不要）
+### 1. テンプレートをコピー
+
+`articles/_template.js` をコピーして、記事IDのファイル名に変更します。
+
+```
+例: articles/oslo_nexus.js
+```
+
+### 2. ファイルを編集
+
+VSCode でコピーしたファイルを開き、内容を書き換えます。
+
+```js
+WIKI_ARTICLES["oslo_nexus"] = {
+  id:          "oslo_nexus",       // ← ファイル名と同じにする
+  title:       "オスロ・ネクサス",
+  categories:  ["geography"],
+  lastUpdated: "2157年6月1日",
+
+  infobox: {
+    image:        null,
+    imageCaption: "",
+    rows: [
+      { label: "人口", value: "340万人" },
+    ]
+  },
+
+  sections: [
+    { heading: "",      text: "冒頭説明。[[ヴァルハイム帝国]]の首都。" },
+    { heading: "歴史",  text: "2031年に首都として指定された。" },
+  ]
+};
+```
+
+### 3. _index.js に追記
+
+`articles/_index.js` を開いて、記事IDを追加します。
+
+```js
+const WIKI_ARTICLE_IDS = [
+  "main",
+  "valhiem",
+  "erik",
+  "aurora_power",
+  "oslo_nexus",  // ← 追加
+];
+```
+
+### 4. index.html に script タグを追加
+
+`index.html` の `<!-- ↓ 新しい記事ファイルをここに追加 -->` の下に追記します。
+
+```html
+<script src="articles/oslo_nexus.js"></script>
+```
+
+---
+
+## 記事を削除する手順
+
+1. `articles/` からファイルを削除する
+2. `articles/_index.js` から該当のIDを削除する
+3. `index.html` から該当の `<script>` タグを削除する
+
+---
+
+## 記事を編集する
+
+該当の `.js` ファイルを VSCode で開いて直接編集するだけです。
+
+---
+
+## Wikiリンクの書き方
+
+本文の `text` 内で `[[記事タイトル]]` と書くとリンクになります。
+
+- タイトルが一致する記事がある → 青リンク
+- 存在しない → 赤リンク（まだ書いていない記事の予告に使える）
+
+---
+
+## カテゴリを追加する
+
+`articles/_config.js` の `categories` に追記します。
+
+```js
+{ id: "military", name: "軍事", color: "#8b0000" },
+```
+
+---
+
+## 画像を使う
+
+1. `images/` フォルダを作成して画像を置く
+2. infobox の `image` に `"images/ファイル名.jpg"` を指定
 
 ---
 
 ## GitHub Pages への公開
 
-1. GitHubリポジトリに `wiki/` 内のファイルをすべてアップロード
-2. リポジトリの Settings → Pages → Source で `main` ブランチのルートを選択
-3. 公開されたURLにアクセス
-
----
-
-## js/data.js の編集方法
-
-### サイト設定
-
-```js
-"site": {
-  "name": "架空百科事典",
-  "tagline": "みんなで作る...",
-  "notice": "この内容はフィクションです"
-}
-```
-
-### カテゴリ追加
-
-```js
-{ "id": "military", "name": "軍事", "color": "#8b0000" }
-```
-
-### 記事追加
-
-```js
-{
-  "id": "my_article",
-  "title": "記事タイトル",
-  "categories": ["history"],
-  "lastUpdated": "2157年1月1日",
-  "sections": [
-    { "heading": "", "text": "冒頭文。[[他の記事名]]でリンク。<b>太字</b>も可。" },
-    { "heading": "歴史", "text": "歴史の説明..." }
-  ],
-  "infobox": {
-    "image": null,
-    "imageCaption": "",
-    "rows": [
-      { "label": "設立", "value": "2031年" }
-    ]
-  }
-}
-```
-
-Wikiリンク: `[[記事タイトル]]` → 該当記事が存在すれば青リンク、なければ赤リンク
-
-### 画像の使い方
-
-1. `wiki/images/` フォルダを作成して画像を入れる
-2. infobox の `"image"` に `"images/ファイル名.jpg"` を指定
+このフォルダの中身をそのままリポジトリのルートにアップロードし、
+Settings → Pages → Source で `main` ブランチ・`/ (root)` を選択してください。
